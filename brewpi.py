@@ -64,14 +64,14 @@ except ImportError:
 
 
 #local imports
-import temperatureProfile
-import programController as programmer
-import brewpiJson
+import temperature_profile
+import program_controller as programmer
+import brewpi_json
 import BrewPiUtil as util
-import brewpiVersion
-import pinList
-import expandLogMessage
-import BrewPiProcess
+import brewpi_version
+import pin_list
+import expand_log_message
+import brewpi_process
 
 
 # Settings will be read from controller, initialize with same defaults as controller
@@ -135,7 +135,7 @@ for o, a in opts:
             sys.exit('ERROR: Config file "%s" was not found!' % configFile)
     # send quit instruction to all running instances of BrewPi
     if o in ('-s', '--status'):
-        allProcesses = BrewPiProcess.BrewPiProcesses()
+        allProcesses = brewpi_process.BrewPiProcesses()
         allProcesses.update()
         running = allProcesses.as_dict()
         if running:
@@ -146,20 +146,20 @@ for o, a in opts:
     # quit/kill running instances, then keep this one
     if o in ('-q', '--quit'):
         logMessage("Asking all BrewPi Processes to quit on their socket")
-        allProcesses = BrewPiProcess.BrewPiProcesses()
+        allProcesses = brewpi_process.BrewPiProcesses()
         allProcesses.quitAll()
         time.sleep(2)
         exit()
     # send SIGKILL to all running instances of BrewPi
     if o in ('-k', '--kill'):
         logMessage("Killing all BrewPi Processes")
-        allProcesses = BrewPiProcess.BrewPiProcesses()
+        allProcesses = brewpi_process.BrewPiProcesses()
         allProcesses.killAll()
         exit()
     # close all existing instances of BrewPi by quit/kill and keep this one
     if o in ('-f', '--force'):
         logMessage("Closing all existing processes of BrewPi and keeping this one")
-        allProcesses = BrewPiProcess.BrewPiProcesses()
+        allProcesses = brewpi_process.BrewPiProcesses()
         if len(allProcesses.update()) > 1:  # if I am not the only one running
             allProcesses.quitAll()
             time.sleep(2)
@@ -187,7 +187,7 @@ if checkDontRunFile:
         exit(0)
 
 # check for other running instances of BrewPi that will cause conflicts with this instance
-allProcesses = BrewPiProcess.BrewPiProcesses()
+allProcesses = brewpi_process.BrewPiProcesses()
 allProcesses.update()
 myProcess = allProcesses.me()
 if allProcesses.findConflicts(myProcess):
@@ -269,7 +269,7 @@ def setFiles():
         jsonFileName = jsonFileName + '-' + str(i)
 
     localJsonFileName = dataPath + jsonFileName + '.json'
-    brewpiJson.newEmptyFile(localJsonFileName)
+    brewpi_json.newEmptyFile(localJsonFileName)
 
     # Define a location on the web server to copy the file to after it is written
     wwwJsonFileName = wwwDataPath + jsonFileName + '.json'
@@ -279,7 +279,7 @@ def setFiles():
     wwwCsvFileName = (wwwDataPath + beerFileName + '.csv')
 
     # create new empty json file
-    brewpiJson.newEmptyFile(localJsonFileName)
+    brewpi_json.newEmptyFile(localJsonFileName)
 
 def startBeer(beerName):
     if config['dataLogging'] == 'active':
@@ -371,7 +371,7 @@ time.sleep(float(config.get('startupDelay', 10)))
 
 
 logMessage("Checking software version on controller... ")
-hwVersion = brewpiVersion.getVersionFromSerial(ser)
+hwVersion = brewpi_version.getVersionFromSerial(ser)
 if hwVersion is None:
     logMessage("Warning: Cannot receive version number from controller. " +
                "Your controller is either not programmed or running a very old version of BrewPi. " +
@@ -385,11 +385,11 @@ else:
         logMessage("Warning: minimum BrewPi version compatible with this script is " +
                    compatibleHwVersion +
                    " but version number received is " + hwVersion.toString())
-    if int(hwVersion.log) != int(expandLogMessage.getVersion()):
+    if int(hwVersion.log) != int(expand_log_message.getVersion()):
         logMessage("Warning: version number of local copy of logMessages.h " +
                    "does not match log version number received from controller." +
                    "controller version = " + str(hwVersion.log) +
-                   ", local copy version = " + str(expandLogMessage.getVersion()))
+                   ", local copy version = " + str(expand_log_message.getVersion()))
 
 if hwVersion is not None:
     ser.flush()
@@ -685,7 +685,7 @@ while run:
                 response = dict(board=hwVersion.board,
                                 shield=hwVersion.shield,
                                 deviceList=deviceList,
-                                pinList=pinList.getPinList(hwVersion.board, hwVersion.shield))
+                                pinList=pin_list.getPinList(hwVersion.board, hwVersion.shield))
                 conn.send(json.dumps(response))
             else:
                 conn.send("device-list-not-up-to-date")
@@ -767,7 +767,7 @@ while run:
 
                     newRow = prevTempJson
                     # add to JSON file
-                    brewpiJson.addRow(localJsonFileName, newRow)
+                    brewpi_json.addRow(localJsonFileName, newRow)
                     # copy to www dir.
                     # Do not write directly to www dir to prevent blocking www file.
                     shutil.copyfile(localJsonFileName, wwwJsonFileName)
@@ -793,7 +793,7 @@ while run:
                 elif line[0] == 'D':
                     # debug message received
                     try:
-                        expandedMessage = expandLogMessage.expandLogMessage(line[2:])
+                        expandedMessage = expand_log_message.expandLogMessage(line[2:])
                         logMessage("controller debug message: " + expandedMessage)
                     except Exception, e:  # catch all exceptions, because out of date file could cause errors
                         logMessage("Error while expanding log message '" + line[2:] + "'" + str(e))
@@ -836,7 +836,7 @@ while run:
 
         # Check for update from temperature profile
         if cs['mode'] == 'p':
-            newTemp = temperatureProfile.getNewTemp(util.scriptPath())
+            newTemp = temperature_profile.getNewTemp(util.scriptPath())
             if newTemp != cs['beerSet']:
                 cs['beerSet'] = newTemp
                 # if temperature has to be updated send settings to controller

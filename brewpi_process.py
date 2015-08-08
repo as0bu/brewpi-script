@@ -36,7 +36,7 @@ except ImportError:
     print "BrewPi requires psutil to run, please install it via pip: 'sudo pip install psutil --upgrade"
     sys.exit(1)
 
-import BrewPiSocket
+import brewpi_socket
 import BrewPiUtil as util
 
 
@@ -152,7 +152,7 @@ class BrewPiProcesses():
             cfg = util.scriptPath() + "/settings/config.cfg"
         bp.cfg = util.readCfgWithDefaults(cfg)
         bp.port = bp.cfg['port']
-        bp.sock = BrewPiSocket.BrewPiSocket(bp.cfg)
+        bp.sock = brewpi_socket.BrewPiSocket(bp.cfg)
         return bp
 
     def get(self):

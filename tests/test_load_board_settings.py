@@ -17,13 +17,12 @@ def loadDefaultConfig():
     config = ConfigObj(configFile)
     return config
 
-class  LoadBoardSettingsTestCase(unittest.TestCase):
+class LoadBoardSettingsTestCase(unittest.TestCase):
 
     def setUp(self):
         self.config = loadDefaultConfig()
         arduinohome = self.config.get('arduinoHome', '/usr/share/arduino/')  # location of Arduino sdk
         self.boardsFile = programController.loadBoardsFile(arduinohome);
-    #
     
     def test_loadBoardSettings_Leonardo(self):
         boardType = 'leonardo'
