@@ -21,7 +21,7 @@ import simplejson as json
 
 # append parent directory to be able to import files
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
-import expandLogMessage
+import expand_log_message
 import BrewPiUtil as util
 
 # Read in command line arguments
@@ -65,7 +65,7 @@ while 1:
         if(line[0]=='D'):
             try:
                 decoded = json.loads(line[2:])
-                print "debug message received: " + expandLogMessage.expandLogMessage(line[2:])
+                print "debug message received: " + expand_log_message.expandLogMessage(line[2:])
             except json.JSONDecodeError:
                 # print line normally, is not json
                 print "debug message received: " + line[2:]

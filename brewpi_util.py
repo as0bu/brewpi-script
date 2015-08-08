@@ -18,7 +18,7 @@ import time
 import sys
 import os
 import serial
-import autoSerial
+import auto_serial
 
 try:
     import configobj
@@ -119,7 +119,7 @@ def setupSerial(config, baud_rate=57600, time_out=0.1):
             if portSetting == None or portSetting == 'None' or portSetting == "none":
                 continue  # skip None setting
             if portSetting == "auto":
-                port, devicetype = autoSerial.detect_port()
+                port, devicetype = auto_serial.detect_port()
                 if not port:
                     error = "Could not find compatible serial devices \n"
                     continue # continue with altport

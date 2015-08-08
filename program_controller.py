@@ -19,11 +19,11 @@ import subprocess as sub
 import time
 import simplejson as json
 import os
-import brewpiVersion
-import expandLogMessage
-from MigrateSettings import MigrateSettings
+import brewpi_version
+import expand_log_message
+from migrate_settings import MigrateSettings
 from sys import stderr
-import BrewPiUtil as util
+import brewpi_util as util
 
 # print everything in this file to stderr so it ends up in the correct log file for the web UI
 def printStdErr(*objs):
@@ -293,7 +293,7 @@ class SerialProgrammer:
         pass
 
     def fetch_version(self, msg):
-        version = brewpiVersion.getVersionFromSerial(self.ser)
+        version = brewpi_version.getVersionFromSerial(self.ser)
         if version is None:
             printStdErr("Warning: Cannot receive version number from controller. " +
                         "Your controller is either not programmed yet or running a very old version of BrewPi. " +
@@ -379,7 +379,7 @@ class SerialProgrammer:
 
     def print_debug_log(self, line):
         try:  # debug message received
-            expandedMessage = expandLogMessage.expandLogMessage(line[2:])
+            expandedMessage = expand_log_message.expandLogMessage(line[2:])
             printStdErr(expandedMessage)
         except Exception, e:  # catch all exceptions, because out of date file could cause errors
             printStdErr("Error while expanding log message: " + str(e))

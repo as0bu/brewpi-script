@@ -14,16 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with BrewPi.  If not, see <http://www.gnu.org/licenses/>.
 
-import brewpiJson
+import brewpi_json
 import simplejson as json
-import parseEnum
+import parse_enum
 import os
 
 logMessagesFile = os.path.dirname(__file__) + '/LogMessages.h'
 
-errorDict = parseEnum.parseEnumInFile(logMessagesFile, 'errorMessages')
-infoDict = parseEnum.parseEnumInFile(logMessagesFile, 'infoMessages')
-warningDict = parseEnum.parseEnumInFile(logMessagesFile, 'warningMessages')
+errorDict = parse_enum.parseEnumInFile(logMessagesFile, 'errorMessages')
+infoDict = parse_enum.parseEnumInFile(logMessagesFile, 'infoMessages')
+warningDict = parse_enum.parseEnumInFile(logMessagesFile, 'warningMessages')
 
 def valToFunction(val):
 	functions = ['None',  # 0

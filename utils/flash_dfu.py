@@ -27,11 +27,11 @@ import getopt
 import subprocess
 import re
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..") # append parent directory to be able to import files
-from gitHubReleases import gitHubReleases
-import BrewPiUtil as util
-import autoSerial
+from github_releases import gitHubReleases
+import brewpi_util as util
+import auto_serial
 import serial
-from programController import SerialProgrammer
+from program_controller import SerialProgrammer
 
 releases = gitHubReleases("https://api.github.com/repos/brewpi/firmware")
 
@@ -198,7 +198,7 @@ while(True):
             if retries > 0:
                 programmer.fetch_version("Success! ")
                 programmer.reset_settings(testMode)
-                serialPorts = autoSerial.detect_all_ports() # update serial ports here so device will not be seen as new
+                serialPorts = auto_serial.detect_all_ports() # update serial ports here so device will not be seen as new
             else:
                 print "Could not open serial port after programming"
         else:
@@ -213,7 +213,7 @@ while(True):
         firstLoop = False
         if autoDfu:
             previousSerialPorts = serialPorts
-            serialPorts = autoSerial.detect_all_ports()
+            serialPorts = auto_serial.detect_all_ports()
             newPorts = list(set(serialPorts) - set(previousSerialPorts))
             if len(newPorts):
                 print "Found new serial port connected: {0}".format(newPorts[0])
