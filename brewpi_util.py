@@ -23,11 +23,6 @@ import serial
 try:
     import configobj
 except ImportError:
-    # TODO: change message below to match platform
-    # import platform
-    # platform.linux_distribution()
-    # should return ('','','') for windows
-    # example returns ('Fedora', '21', 'Twenty One')
     print "BrewPi requires ConfigObj to run, please install " \
           "it with 'sudo apt-get install python-configobj"
     sys.exit(1)
@@ -71,22 +66,26 @@ def read_cfg_with_defaults(cfg):
         except configobj.ParseError:
             log_message("ERROR: Could not parse user config file %s" % cfg)
         except IOError:
-            log_message("Could not open user config file %s. Using only default config file" % cfg)
+            log_message("Could not open user config file %s. Using only "
+                        "default config file" % cfg)
     return config
 
 
-def configSet(configFile, settingName, value):
-    if not os.path.isfile(configFile):
-        log_message("User config file %s does not exist yet, creating it..." % configFile)
+def config_set(config_file, setting_name, value):
+    if not os.path.isfile(config_file):
+        log_message("User config file %s does not exist yet, "
+                    "creating it..." % config_file)
     try:
-        config = configobj.ConfigObj(configFile)
-        config[settingName] = value
+        config = configobj.ConfigObj(config_file)
+        config[setting_name] = value
         config.write()
     except IOError as e:
-        log_message("I/O error(%d) while updating %s: %s " % (e.errno, configFile, e.strerror))
-        log_message("Probably your permissions are not set correctly. " +
-                   "To fix this, run 'sudo sh /home/brewpi/fixPermissions.sh'")
-    return read_cfg_with_defaults(configFile)  # return updated ConfigObj
+        log_message("I/O error(%d) while updating %s: %s " % (
+            e.errno, config_file, e.strerror)
+        )
+        log_message("Your permissions may not be set correctly. To fix this, "
+                    "run 'sudo sh /home/brewpi/fixPermissions.sh'")
+    return read_cfg_with_defaults(config_file)  # return updated ConfigObj
 
 
 def log_message(message):
@@ -98,8 +97,8 @@ def log_message(message):
 
 def script_path():
     """
-    Return the path of BrewPiUtil.py. __file__ only works in modules, not in the main script.
-    That is why this function is needed.
+    Return the path of BrewPiUtil.py. __file__ only works in modules, not in
+    the main script. That is why this function is needed.
     """
     return os.path.dirname(__file__)
 
@@ -115,31 +114,28 @@ def remove_dont_run_file(path='/var/www/do_not_run_brewpi'):
 
 def setup_serial(config, baud_rate=57600, time_out=0.1):
     ser = None
-    dumpSerial = config.get('dumpSerial', False)
+    dump_serial = config.get('dumpSerial', False)
 
-    error1 = None
-    error2 = None
     # open serial port
     tries = 0
     log_message("Opening serial port")
     while tries < 10:
         error = ""
-        for portSetting in [config['port'], config['altport']]:
-            if portSetting is None or portSetting == 'None' or portSetting == "none":
+        for port_setting in [config['port'], config['altport']]:
+            if str(port_setting) == 'None' or port_setting == "none":
                 continue  # skip None setting
-            if portSetting == "auto":
+            if port_setting == "auto":
                 port, devicetype = auto_serial.detect_port()
                 if not port:
                     error = "Could not find compatible serial devices \n"
-                    continue # continue with altport
+                    continue  # continue with altport
             else:
-                port = portSetting
+                port = port_setting
             try:
                 ser = serial.Serial(port, baudrate=baud_rate, timeout=time_out)
                 if ser:
                     break
             except (IOError, OSError, serial.SerialException) as e:
-                # error += '0}.\n({1})'.format(portSetting, str(e))
                 error += str(e) + '\n'
         if ser:
             break
@@ -151,31 +147,32 @@ def setup_serial(config, baud_rate=57600, time_out=0.1):
         ser.flushInput()
         ser.flushOutput()
     else:
-         log_message("Errors while opening serial port: \n" + error)
+        log_message("Errors while opening serial port: \n" + error)
 
     # yes this is monkey patching, but I don't see how to replace the
     # methods on a dynamically instantiated type any other way
     # TODO: (rbrady) change monkey patching to metaclass implementation
-    if dumpSerial:
+    if dump_serial:
         ser.readOriginal = ser.read
         ser.writeOriginal = ser.write
 
-        def readAndDump(size=1):
+        def read_and_dump(size=1):
             r = ser.readOriginal(size)
             sys.stdout.write(r)
             return r
 
-        def writeAndDump(data):
+        def write_and_dump(data):
             ser.writeOriginal(data)
             sys.stderr.write(data)
 
-        ser.read = readAndDump
-        ser.write = writeAndDump
+        ser.read = read_and_dump
+        ser.write = write_and_dump
 
     return ser
 
 
-# remove extended ascii characters from string, because they can raise UnicodeDecodeError later
-def asciiToUnicode(s):
+# remove extended ascii characters from string, because they can
+# raise UnicodeDecodeError later
+def ascii_to_unicode(s):
     s = s.replace(chr(0xB0), '&deg')
     return unicode(s, 'ascii', 'ignore')
