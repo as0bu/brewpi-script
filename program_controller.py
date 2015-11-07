@@ -23,7 +23,7 @@ import brewpi_version
 import expand_log_message
 from migrate_settings import MigrateSettings
 from sys import stderr
-import BrewPiUtil as util
+import brewpi_util as util
 
 # print everything in this file to stderr so it ends up in the correct log file for the web UI
 def printStdErr(*objs):

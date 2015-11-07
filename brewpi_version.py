@@ -18,7 +18,7 @@ import simplejson as json
 import sys
 import time
 from distutils.version import LooseVersion
-from BrewPiUtil import asciiToUnicode
+from brewpi_util import asciiToUnicode
 from serial import SerialException
 
 def getVersionFromSerial(ser):
