@@ -183,8 +183,8 @@ while(True):
 
             print "Programming done, now resetting EEPROM to defaults"
             # reset EEPROM to defaults
-            configFile = util.scriptPath() + '/settings/config.cfg'
-            config = util.readCfgWithDefaults(configFile)
+            configFile = util.script_path() + '/settings/config.cfg'
+            config = util.read_cfg_with_defaults(configFile)
             programmer = SerialProgrammer.create(config, "core")
 
             # open serial port

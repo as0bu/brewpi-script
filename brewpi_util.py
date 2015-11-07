@@ -14,22 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with BrewPi.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-import sys
 import os
+import sys
+import time
+
 import serial
-import auto_serial
 
 try:
     import configobj
 except ImportError:
-    print "BrewPi requires ConfigObj to run, please install it with 'sudo apt-get install python-configobj"
+    print "BrewPi requires ConfigObj to run, please install " \
+          "it with 'sudo apt-get install python-configobj"
     sys.exit(1)
 
+import auto_serial
 
-def addSlash(path):
+
+def add_slash(path):
     """
-    Adds a slash to the path, but only when it does not already have a slash at the end
+    Adds a slash to the path, but only when it does not already have
+    a slash at the end
     Params: a string
     Returns: a string
     """
@@ -38,7 +42,7 @@ def addSlash(path):
     return path
 
 
-def readCfgWithDefaults(cfg):
+def read_cfg_with_defaults(cfg):
     """
     Reads a config file with the default config file as fallback
 
@@ -50,52 +54,56 @@ def readCfgWithDefaults(cfg):
     ConfigObj of settings
     """
     if not cfg:
-        cfg = addSlash(sys.path[0]) + 'settings/config.cfg'
+        cfg = add_slash(sys.path[0]) + 'settings/config.cfg'
 
-    defaultCfg = scriptPath() + '/settings/defaults.cfg'
-    config = configobj.ConfigObj(defaultCfg)
+    default_cfg = script_path() + '/settings/defaults.cfg'
+    config = configobj.ConfigObj(default_cfg)
 
     if cfg:
         try:
-            userConfig = configobj.ConfigObj(cfg)
-            config.merge(userConfig)
+            user_config = configobj.ConfigObj(cfg)
+            config.merge(user_config)
         except configobj.ParseError:
-            logMessage("ERROR: Could not parse user config file %s" % cfg)
+            log_message("ERROR: Could not parse user config file %s" % cfg)
         except IOError:
-            logMessage("Could not open user config file %s. Using only default config file" % cfg)
+            log_message("Could not open user config file %s. Using only "
+                        "default config file" % cfg)
     return config
 
 
-def configSet(configFile, settingName, value):
-    if not os.path.isfile(configFile):
-        logMessage("User config file %s does not exist yet, creating it..." % configFile)
+def config_set(config_file, setting_name, value):
+    if not os.path.isfile(config_file):
+        log_message("User config file %s does not exist yet, "
+                    "creating it..." % config_file)
     try:
-        config = configobj.ConfigObj(configFile)
-        config[settingName] = value
+        config = configobj.ConfigObj(config_file)
+        config[setting_name] = value
         config.write()
     except IOError as e:
-        logMessage("I/O error(%d) while updating %s: %s " % (e.errno, configFile, e.strerror))
-        logMessage("Probably your permissions are not set correctly. " +
-                   "To fix this, run 'sudo sh /home/brewpi/fixPermissions.sh'")
-    return readCfgWithDefaults(configFile)  # return updated ConfigObj
+        log_message("I/O error(%d) while updating %s: %s " % (
+            e.errno, config_file, e.strerror)
+        )
+        log_message("Your permissions may not be set correctly. To fix this, "
+                    "run 'sudo sh /home/brewpi/fixPermissions.sh'")
+    return read_cfg_with_defaults(config_file)  # return updated ConfigObj
 
 
-def logMessage(message):
+def log_message(message):
     """
     Prints a timestamped message to stderr
     """
     print >> sys.stderr, time.strftime("%b %d %Y %H:%M:%S   ") + message
 
 
-def scriptPath():
+def script_path():
     """
-    Return the path of BrewPiUtil.py. __file__ only works in modules, not in the main script.
-    That is why this function is needed.
+    Return the path of BrewPiUtil.py. __file__ only works in modules, not in
+    the main script. That is why this function is needed.
     """
     return os.path.dirname(__file__)
 
 
-def removeDontRunFile(path='/var/www/do_not_run_brewpi'):
+def remove_dont_run_file(path='/var/www/do_not_run_brewpi'):
     if os.path.isfile(path):
         os.remove(path)
         if not sys.platform.startswith('win'):  # cron not available
@@ -104,33 +112,30 @@ def removeDontRunFile(path='/var/www/do_not_run_brewpi'):
         print "File do_not_run_brewpi does not exist at " + path
 
 
-def setupSerial(config, baud_rate=57600, time_out=0.1):
+def setup_serial(config, baud_rate=57600, time_out=0.1):
     ser = None
-    dumpSerial = config.get('dumpSerial', False)
+    dump_serial = config.get('dumpSerial', False)
 
-    error1 = None
-    error2 = None
     # open serial port
     tries = 0
-    logMessage("Opening serial port")
+    log_message("Opening serial port")
     while tries < 10:
         error = ""
-        for portSetting in [config['port'], config['altport']]:
-            if portSetting == None or portSetting == 'None' or portSetting == "none":
+        for port_setting in [config['port'], config['altport']]:
+            if str(port_setting) == 'None' or port_setting == "none":
                 continue  # skip None setting
-            if portSetting == "auto":
+            if port_setting == "auto":
                 port, devicetype = auto_serial.detect_port()
                 if not port:
                     error = "Could not find compatible serial devices \n"
-                    continue # continue with altport
+                    continue  # continue with altport
             else:
-                port = portSetting
+                port = port_setting
             try:
                 ser = serial.Serial(port, baudrate=baud_rate, timeout=time_out)
                 if ser:
                     break
             except (IOError, OSError, serial.SerialException) as e:
-                # error += '0}.\n({1})'.format(portSetting, str(e))
                 error += str(e) + '\n'
         if ser:
             break
@@ -142,29 +147,32 @@ def setupSerial(config, baud_rate=57600, time_out=0.1):
         ser.flushInput()
         ser.flushOutput()
     else:
-         logMessage("Errors while opening serial port: \n" + error)
+        log_message("Errors while opening serial port: \n" + error)
 
-    # yes this is monkey patching, but I don't see how to replace the methods on a dynamically instantiated type any other way
-    if dumpSerial:
+    # yes this is monkey patching, but I don't see how to replace the
+    # methods on a dynamically instantiated type any other way
+    # TODO: (rbrady) change monkey patching to metaclass implementation
+    if dump_serial:
         ser.readOriginal = ser.read
         ser.writeOriginal = ser.write
 
-        def readAndDump(size=1):
+        def read_and_dump(size=1):
             r = ser.readOriginal(size)
             sys.stdout.write(r)
             return r
 
-        def writeAndDump(data):
+        def write_and_dump(data):
             ser.writeOriginal(data)
             sys.stderr.write(data)
 
-        ser.read = readAndDump
-        ser.write = writeAndDump
+        ser.read = read_and_dump
+        ser.write = write_and_dump
 
     return ser
 
 
-# remove extended ascii characters from string, because they can raise UnicodeDecodeError later
-def asciiToUnicode(s):
+# remove extended ascii characters from string, because they can
+# raise UnicodeDecodeError later
+def ascii_to_unicode(s):
     s = s.replace(chr(0xB0), '&deg')
     return unicode(s, 'ascii', 'ignore')
