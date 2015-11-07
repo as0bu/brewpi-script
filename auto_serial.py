@@ -1,16 +1,16 @@
 """
-Automatically finds a compatible device (Photon, Core, Arduino), modified from Matthews work in brewpi-connector
+Automatically finds a compatible device (Photon, Core, Arduino), modified from
+Matthews work in brewpi-connector
 """
 
 from __future__ import absolute_import
 import re
+
 from serial.tools import list_ports
 
 
 def serial_ports():
-    """
-    Returns a generator for all available serial ports
-    """
+    """Returns a generator for all available serial ports."""
     for port in serial_port_info():
         yield port[0]
 
@@ -30,9 +30,10 @@ def matches(text, regex):
 def is_recognised_device(p):
     port, name, desc = p
     for d in known_devices.keys():
-        if matches(desc.lower(), d.lower()): # match on VID
-            return known_devices[d] # return name
+        if matches(desc.lower(), d.lower()):  # match on VID
+            return known_devices[d]  # return name
     return None
+
 
 def find_arduino_ports(ports):
     for p in ports:
@@ -56,10 +57,12 @@ def detect_port():
     """
     ports = detect_all_ports()
     if len(ports) > 1:
-        print "Warning: detected multiple compatible serial ports, using the first."
+        print "Warning: detected multiple compatible serial ports, using the " \
+              "first."
     if ports:
         return ports[0]
     return (None, None)
+
 
 def detect_all_ports():
     """
@@ -76,7 +79,8 @@ def configure_serial_for_device(s, d):
     :param s the Serial instance to configure
     :param d the device (port, name, details) to configure the serial port
     """
-    # for now, all devices connect at 57600 baud with defaults for parity/stop bits etc.
+    # for now, all devices connect at 57600 baud with defaults for parity/stop
+    # bits etc.
     s.setBaudrate(57600)
 
 

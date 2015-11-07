@@ -27,16 +27,16 @@ def printStdErr(*objs):
 
 # Quits all running instances of BrewPi
 def quitBrewPi(webPath):
-    import BrewPiProcess
-    allProcesses = BrewPiProcess.BrewPiProcesses()
+    import brewpi_process
+    allProcesses = brewpi_process.BrewPiProcesses()
     allProcesses.stopAll(webPath + "/do_not_run_brewpi")
 
 
 def updateFromGitHub(userInput = False, restoreSettings = True, restoreDevices = True):
     import BrewPiUtil as util
-    from gitHubReleases import gitHubReleases
-    import brewpiVersion
-    import programController as programmer
+    from github_releases import gitHubReleases
+    import brewpi_version
+    import program_controller as programmer
 
     configFile = util.scriptPath() + '/settings/config.cfg'
     config = util.readCfgWithDefaults(configFile)
@@ -55,7 +55,7 @@ def updateFromGitHub(userInput = False, restoreSettings = True, restoreDevices =
     printStdErr("\nChecking current firmware version...")
     try:
         ser = util.setupSerial(config)
-        hwVersion = brewpiVersion.getVersionFromSerial(ser)
+        hwVersion = brewpi_version.getVersionFromSerial(ser)
         family = hwVersion.family
         shield = hwVersion.shield
         board = hwVersion.board

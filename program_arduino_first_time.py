@@ -18,7 +18,7 @@ import os
 import sys
 from configobj import ConfigObj
 
-import programController as programmer
+import program_controller as programmer
 import BrewPiUtil as util
 
 # Read in command line arguments
