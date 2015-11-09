@@ -84,7 +84,7 @@ def config_set(config_file, setting_name, value):
             e.errno, config_file, e.strerror)
         )
         log_message("Your permissions may not be set correctly. To fix this, "
-                    "run 'sudo sh /home/brewpi/fixPermissions.sh'")
+                    "run 'sudo sh /home/brewpi/utils/fixPermissions.sh'")
     return read_cfg_with_defaults(config_file)  # return updated ConfigObj
 
 
